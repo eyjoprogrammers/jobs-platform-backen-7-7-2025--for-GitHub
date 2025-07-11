@@ -1,34 +1,37 @@
-# استخدم صورة PHP مع Apache
 FROM php:8.2-apache
 
-# تثبيت PHP extensions المطلوبة للـ Laravel
+# تثبيت التبعيات
 RUN apt-get update && apt-get install -y \
     git \
     curl \
+    zip \
+    unzip \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
     libonig-dev \
     libxml2-dev \
-    zip \
-    unzip \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# نسخ ملفات المشروع
-COPY . /var/www/html/
+# تمكين mod_rewrite في Apache
+RUN a2enmod rewrite
+
+# نسخ ملفات المشروع إلى /var/www/html
+COPY . /var/www/html
+
+# إعداد مجلد العمل
+WORKDIR /var/www/html
 
 # تثبيت Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN composer install
 
-# إعداد Apache
+# إعداد صلاحيات
 RUN chown -R www-data:www-data /var/www/html \
-    && a2enmod rewrite
+    && chmod -R 755 /var/www/html/storage
 
-# إعداد Laravel
-WORKDIR /var/www/html
-RUN composer install \
-    && php artisan config:clear \
-    && php artisan route:clear \
-    && php artisan view:clear
+# إعادة ضبط DocumentRoot إلى /var/www/html/public
+RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|' /etc/apache2/sites-available/000-default.conf
 
+# فتح المنفذ 80
 EXPOSE 80
