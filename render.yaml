@@ -5,9 +5,17 @@ services:
     plan: free
     region: oregon
     dockerfilePath: ./Dockerfile
+    buildCommand: |
+      composer install
+      php artisan config:clear
+      php artisan migrate --seed
+      php artisan route:cache
+    startCommand: apache2-foreground
     envVars:
       - key: APP_ENV
         value: production
+      - key: APP_DEBUG
+        value: false
       - key: APP_KEY
         generateValue: true
       - key: DB_CONNECTION
