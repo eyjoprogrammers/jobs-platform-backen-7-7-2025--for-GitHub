@@ -1,56 +1,46 @@
 services:
   - type: web
-    name: jobs-platform-backend
-    env: php
-    region: oregon
+    name: jobs-platform-api
+    runtime: php
     plan: free
-    repo: https://github.com/EyJo/jobs-platform-backen-7-7-2025.git
-    branch: main
-      buildCommand: "composer install && php artisan config:clear && php artisan migrate --seed && php artisan route:cache"
-    startCommand: "php artisan serve --host=0.0.0.0 --port=10000"
-
+    region: oregon
+    buildCommand: |
+      composer install
+      php artisan config:clear
+      php artisan migrate --seed
+      php artisan route:cache
+    startCommand: php artisan serve --host 0.0.0.0 --port $PORT
     envVars:
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
-        value: 'false'
+        value: false
       - key: APP_KEY
-        value: base64:yeAH+FcaYTept/rZeWIct8w9YhisyXSjA2zYFNM2RdU=
-      - key: APP_URL
-        value: https://your-domain-or-render-url.com
-      - key: APP_LOCALE
-        value: en
-      - key: APP_FALLBACK_LOCALE
-        value: en
+        generateValue: true
       - key: DB_CONNECTION
         value: mysql
       - key: DB_HOST
-        value: your-db-host   # مثال: mydbinstance.abcdefg.us-east-1.rds.amazonaws.com
+        fromDatabase:
+          name: jobs-platform-db
+          property: host
       - key: DB_PORT
-        value: '3306'
+        fromDatabase:
+          name: jobs-platform-db
+          property: port
       - key: DB_DATABASE
-        value: jobs_platform_backend_8_7_2025
+        fromDatabase:
+          name: jobs-platform-db
+          property: database
       - key: DB_USERNAME
-        value: root
+        fromDatabase:
+          name: jobs-platform-db
+          property: user
       - key: DB_PASSWORD
-        value: ''   # ضع كلمة السر هنا أو اتركها فارغة إذا لا توجد
-      - key: SESSION_DRIVER
-        value: database
-      - key: QUEUE_CONNECTION
-        value: database
-      - key: CACHE_STORE
-        value: database
-      - key: REDIS_CLIENT
-        value: phpredis
-      - key: REDIS_HOST
-        value: 127.0.0.1
-      - key: REDIS_PASSWORD
-        value: null
-      - key: REDIS_PORT
-        value: '6379'
-      - key: MAIL_MAILER
-        value: log
-      - key: MAIL_FROM_ADDRESS
-        value: hello@example.com
-      - key: MAIL_FROM_NAME
-        value: Laravel
+        fromDatabase:
+          name: jobs-platform-db
+          property: password
+
+databases:
+  - name: jobs-platform-db
+    plan: free
+    region: oregon
