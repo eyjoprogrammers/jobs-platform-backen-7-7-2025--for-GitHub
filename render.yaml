@@ -1,47 +1,28 @@
 services:
   - type: web
     name: jobs-platform-api
-    env: docker
+    env: php
     plan: free
-    region: oregon
-    dockerfilePath: ./Dockerfile
     buildCommand: |
       composer install
       php artisan config:clear
       php artisan migrate --seed
       php artisan route:cache
-    startCommand: apache2-foreground
+    startCommand: php artisan serve --host 0.0.0.0 --port $PORT
     envVars:
       - key: APP_ENV
         value: production
-      - key: APP_DEBUG
-        value: false
       - key: APP_KEY
         generateValue: true
       - key: DB_CONNECTION
-        value: mysql
+        value: pgsql
       - key: DB_HOST
-        fromDatabase:
-          name: jobs-platform-db
-          property: host
+        value: your-db-host
       - key: DB_PORT
-        fromDatabase:
-          name: jobs-platform-db
-          property: port
+        value: 5432
       - key: DB_DATABASE
-        fromDatabase:
-          name: jobs-platform-db
-          property: database
+        value: your-db-name
       - key: DB_USERNAME
-        fromDatabase:
-          name: jobs-platform-db
-          property: user
+        value: your-db-username
       - key: DB_PASSWORD
-        fromDatabase:
-          name: jobs-platform-db
-          property: password
-
-databases:
-  - name: jobs-platform-db
-    plan: free
-    region: oregon
+        value: your-db-password
