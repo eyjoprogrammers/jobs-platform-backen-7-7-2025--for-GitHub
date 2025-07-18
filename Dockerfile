@@ -28,6 +28,4 @@ RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 # نسخ ملف البيئة وتوليد APP_KEY
 COPY .env.example .env
 RUN php artisan key:generate
-# إنشاء قاعدة بيانات SQLite فارغة داخل المسار الصحيح
-RUN touch /var/www/html/database/database.sqlite
-RUN php artisan migrate --force
+
